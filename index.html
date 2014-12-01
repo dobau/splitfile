@@ -1,0 +1,79 @@
+<html>
+<head>
+</head>
+<body>
+<div>
+	<div>
+		<textarea id="source" rows="20" cols="160"></textarea>
+	</div>
+	<div>
+		<b>Formato</b> <small>Exemplo: {"Coluna1": 2, "Coluna2": 6, "Coluna3": 4, "Coluna5": 5}</small>
+		<input type="text" id="format" width="800" />
+	</div>
+	<div>
+		<input type="button" id="go" value="Execute"/>
+	</div>
+	<div>
+		<table id="target" border="1">
+		</table>
+	</div>
+</div>
+</body>
+<script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+<script>
+
+$(function() {
+	function getConfig(format) {
+		var formatJSON = $.parseJSON(format);
+		var config = {positions:[], columns: []};
+		
+		for (col in formatJSON) {
+			config.positions.push(formatJSON[col]);
+			config.columns.push(col);
+		}
+		
+		return config;
+	}
+	
+	function createFirstLine(config) {
+		var tds = [];
+	
+		$.each(config.columns, function(i, v) {
+			tds.push($("<td>").text(v));
+		});
+		
+		return $("<tr>").append(tds);
+	}
+	
+	function execute() {
+		var config = getConfig($("#format").val());
+	
+		var targetEl = $("#target");
+		targetEl.empty();
+		
+		var firstLine = createFirstLine(config);
+		targetEl.append(firstLine);
+
+		var sources = $("#source").val().split("\n");		
+		$.each(sources, function(indexSource, line){
+			var tds = [];
+
+			var seek = 0;
+			$.each(config.positions, function(indexPos, valPos){
+				var text = line.substr(seek, valPos);
+				
+				tds.push($("<td>").text(text));
+				
+				seek = seek + valPos;
+			});
+						
+			targetEl.append($("<tr>").append(tds));
+		});
+	}
+
+	$("#go").click(execute);
+});
+
+
+</script>
+</html>
